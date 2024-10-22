@@ -1,76 +1,127 @@
-# Импорт необходимых модулей
+# Import required modules
 from flask import Flask, render_template, request, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
-
+# Initialize Flask app
 app = Flask(__name__)
-# Указываем URI базы данных
+# Configure database URI and secret key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-# Секретный ключ для защиты сессии
 app.config['SECRET_KEY'] = 'secret_key'
-# Отключаем отслеживание изменений объектов (Track modifications)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Инициализируем SQLAlchemy с использованием экземпляра приложения в качестве контекста
+# Initialize SQLAlchemy with the Flask app
 db = SQLAlchemy(app)
 
-# Модель пользователя
+# Define User model for database with id, username, and password
+
+
 class User(db.Model):
+    """AI is creating summary for User
+
+    Args:
+        db ([type]): [description]
+    """
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
 
-# Создаем таблицы в базе данных, если они не существуют
+# Create tables in the database
+
+
 with app.app_context():
     db.create_all()
-# Определение маршрута для главной страницы
+# Defining the route for the main page
+
+
 @app.route('/')
 @app.route('/home')
 def index():
+    """AI is creating summary for index
+
+    Returns:
+        [type]: [description]
+    """
+# Render the home page
     return render_template("index.html")
-# Определение маршрута для страницы "About"
+
+
 @app.route('/about')
 def about():
+
+    """AI is creating summary for
+
+    Returns:
+        [type]: [description]
+    """
+# Render the about page
     return render_template("about.html")
 
-@app.route('/signup', methods=['GET', 'POST']) # Обработчик запроса для пути "/signup"
-def signup():
-    if request.method == 'POST': # Если запрос отправлен методом POST
-        username = request.form['username'] # Получение имени пользователя из формы
-        password = request.form['password'] # Получение пароля из формы
-        confirm_password = request.form['confirm_password'] # Получение подтверждения пароля из формы
 
-        if password != confirm_password: # Если пароль и подтверждение пароля не совпадают
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """AI is creating summary for signup
+
+    Returns:
+        [type]: [description]
+    """
+    if request.method == 'POST':
+        # Retrieve form data
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        if password != confirm_password:
             flash('Пароли не совпадают.', 'ошибка')
-        elif User.query.filter_by(username=username).first():  # Если имя пользователя уже существует в базе данных
+            # Check if user already exists
+        elif User.query.filter_by(username=username).first():
             flash('Имя пользователя уже существует.', 'ошибка')
         else:
-            new_user = User(username=username, password=password) # Создание нового объекта пользователя
+            # Create a new user
+            new_user = User(username=username, password=password)
             db.session.add(new_user)
             db.session.commit()
             flash("Вы успешно зарегистрировались!", "успех")
-            return redirect('/login') # Перенаправление пользователя на страницу входа
-
-
+            return redirect('/login')
+            # Render the signup page
     return render_template("signup.html")
 
-@app.route('/login', methods=['GET', 'POST']) # Обработчик запроса для пути "/login"
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST': # Если запрос отправлен методом POST
+    """AI is creating summary for login
+
+    Returns:
+        [type]: [description]
+    """
+    # Retrieve username and password from form
+    if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        user = User.query.filter_by(username=username, password=password).first() # Проверка имени пользователя и пароля
+        # Query database for the user with given credentials
+        user = User.query.filter_by(
+            username=username,
+            password=password
+        ).first()
+        # If user exists, display success message and redirect
         if user:
             flash("Вы успешно вошли в систему!", "успех")
             return redirect('/test')
+        # If credentials are incorrect, display error message
         else:
             flash('Неверное имя пользователя или пароль.', 'ошибка')
-
+        # Render the login page template
     return render_template("login.html")
+
 
 @app.route('/test')
 def test():
+    """AI is creating summary for test
+
+    Returns:
+        [type]: [description]
+    """
     return render_template("test.html")
 
+
 if __name__ == '__main__':
-    app.run(debug=True) # Запуск приложения в режиме отладки
+    # Run the app in debug mode
+    app.run(debug=True)
