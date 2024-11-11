@@ -1,2 +1,3 @@
 /venv
 __pycache__/db_conf.cpython-311.pyc
+database/__pycache__/SQLAlchemy_db.cpython-311.pyc
