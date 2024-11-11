@@ -1,39 +1,19 @@
-# Import required modules
 from flask import Flask, render_template, request, flash, redirect
-from flask_sqlalchemy import SQLAlchemy
+from database.SQLAlchemy_db import db, User, init_app
 # Initialize Flask app
 app = Flask(__name__)
-# Configure database URI and secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SECRET_KEY'] = 'secret_key'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize SQLAlchemy with the Flask app
-db = SQLAlchemy(app)
+# Initialize configurations and SQLAlchemy
+init_app(app)
 
-# Define User model for database with id, username, and password
-
-
-class User(db.Model):
-    """AI is creating summary for User
-
-    Args:
-        db ([type]): [description]
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
-
-# Create tables in the database
-
-
+# Create tables in the database if they don't exist
 with app.app_context():
     db.create_all()
+
+
 # Defining the route for the main page
-
-
 @app.route('/')
+# Render the home page
 @app.route('/home')
 def index():
     """AI is creating summary for index
@@ -41,19 +21,17 @@ def index():
     Returns:
         [type]: [description]
     """
-# Render the home page
     return render_template("index.html")
 
 
+# Render the about page
 @app.route('/about')
 def about():
-
-    """AI is creating summary for
+    """AI is creating summary for about
 
     Returns:
         [type]: [description]
     """
-# Render the about page
     return render_template("about.html")
 
 
@@ -71,7 +49,7 @@ def signup():
         confirm_password = request.form['confirm_password']
         if password != confirm_password:
             flash('Пароли не совпадают.', 'ошибка')
-            # Check if user already exists
+        # Check if user already exists
         elif User.query.filter_by(username=username).first():
             flash('Имя пользователя уже существует.', 'ошибка')
         else:
@@ -81,7 +59,7 @@ def signup():
             db.session.commit()
             flash("Вы успешно зарегистрировались!", "успех")
             return redirect('/login')
-            # Render the signup page
+        # Render the signup page
     return render_template("signup.html")
 
 
@@ -96,19 +74,12 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Query database for the user with given credentials
-        user = User.query.filter_by(
-            username=username,
-            password=password
-        ).first()
-        # If user exists, display success message and redirect
+        user = User.query.filter_by(username=username, password=password).first()
         if user:
             flash("Вы успешно вошли в систему!", "успех")
             return redirect('/test')
-        # If credentials are incorrect, display error message
         else:
             flash('Неверное имя пользователя или пароль.', 'ошибка')
-        # Render the login page template
     return render_template("login.html")
 
 
@@ -123,5 +94,4 @@ def test():
 
 
 if __name__ == '__main__':
-    # Run the app in debug mode
     app.run(debug=True)
